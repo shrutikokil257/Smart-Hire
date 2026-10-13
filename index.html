@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Service Connect - Client & Worker Portal</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link to separate CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Navbar -->
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold cursor-pointer" onclick="showHome()">🛠️ ServiceConnect</h1>
+            <div id="nav-actions" class="space-x-3">
+                <button onclick="switchRole('client')" class="bg-indigo-500 hover:bg-indigo-700 px-3 py-1.5 rounded text-sm font-medium">Client Portal</button>
+                <button onclick="switchRole('worker')" class="bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded text-sm font-medium">Worker Portal</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- HOME / ROLE SELECTOR VIEW -->
+        <div id="view-home" class="text-center py-16">
+            <h2 class="text-3xl font-extrabold mb-4 text-slate-900">Find Workers or Get Hired Locally</h2>
+            <p class="text-slate-600 mb-8 max-w-xl mx-auto">Connect directly with trusted local service workers based on categories and area pincode.</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="switchRole('client')" class="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-indigo-700">I am a Client (Looking for Work)</button>
+                <button onclick="switchRole('worker')" class="bg-emerald-600 text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-emerald-700">I am a Worker (Looking for Clients)</button>
+            </div>
+        </div>
+
+        <!-- ================= CLIENT VIEW ================= -->
+        <div id="view-client" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-indigo-900">Client Dashboard</h2>
+                <button onclick="showHome()" class="text-sm text-indigo-600 underline">Back to Home</button>
+            </div>
+
+            <!-- Client Setup Form -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8 max-w-xl">
+                <h3 class="text-lg font-semibold mb-4">Client Quick Setup</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Your Name</label>
+                        <input type="text" id="client-name" class="w-full mt-1 border rounded-lg p-2 focus:ring focus:ring-indigo-300" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Phone Number</label>
+                        <input type="text" id="client-phone" class="w-full mt-1 border rounded-lg p-2 focus:ring focus:ring-indigo-300" placeholder="9876543210">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Location / Pincode</label>
+                        <input type="text" id="client-location" class="w-full mt-1 border rounded-lg p-2 focus:ring focus:ring-indigo-300" placeholder="Area or Pincode">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Worker Search Filter -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <h3 class="text-lg font-semibold mb-4">Search Workers</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Category</label>
+                        <select id="search-category" class="w-full mt-1 border rounded-lg p-2">
+                            <option value="">All Categories</option>
+                            <option value="Plumber">Plumber</option>
+                            <option value="Electrician">Electrician</option>
+                            <option value="Carpenter">Carpenter</option>
+                            <option value="Painter">Painter</option>
+                            <option value="Cleaner">Cleaner</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Area / Pincode</label>
+                        <input type="text" id="search-pincode" class="w-full mt-1 border rounded-lg p-2" placeholder="Enter Pincode">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="searchWorkers()" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-medium">Search</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workers List Results -->
+            <h3 class="text-xl font-bold mb-4">Available Workers</h3>
+            <div id="workers-results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- ================= WORKER VIEW ================= -->
+        <div id="view-worker" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-emerald-900">Worker Portal</h2>
+                <button onclick="showHome()" class="text-sm text-emerald-600 underline">Back to Home</button>
+            </div>
+
+            <!-- Worker Auth / Signup Toggle -->
+            <div id="worker-auth-container" class="bg-white p-6 rounded-xl shadow-md max-w-xl mx-auto">
+                <div class="flex mb-6 border-b">
+                    <button onclick="toggleWorkerTab('login')" id="tab-login-btn" class="flex-1 pb-2 font-bold text-emerald-600 border-b-2 border-emerald-600">Login</button>
+                    <button onclick="toggleWorkerTab('signup')" id="tab-signup-btn" class="flex-1 pb-2 font-semibold text-slate-400">Sign Up</button>
+                </div>
+
+                <!-- Worker Login Form -->
+                <div id="worker-login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Email</label>
+                        <input type="email" id="login-email" class="w-full mt-1 border rounded-lg p-2" placeholder="worker@gmail.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Password</label>
+                        <input type="password" id="login-password" class="w-full mt-1 border rounded-lg p-2" placeholder="••••••••">
+                    </div>
+                    <button onclick="handleWorkerLogin()" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700">Login</button>
+                </div>
+
+                <!-- Worker Signup Form -->
+                <div id="worker-signup-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Full Name</label>
+                        <input type="text" id="w-name" class="w-full mt-1 border rounded-lg p-2">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Email</label>
+                            <input type="email" id="w-email" class="w-full mt-1 border rounded-lg p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Password</label>
+                            <input type="password" id="w-password" class="w-full mt-1 border rounded-lg p-2">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Category / Skills</label>
+                            <select id="w-category" class="w-full mt-1 border rounded-lg p-2">
+                                <option value="Plumber">Plumber</option>
+                                <option value="Electrician">Electrician</option>
+                                <option value="Carpenter">Carpenter</option>
+                                <option value="Painter">Painter</option>
+                                <option value="Cleaner">Cleaner</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Pincode / Location</label>
+                            <input type="text" id="w-pincode" class="w-full mt-1 border rounded-lg p-2">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Upload Photo (Image URL)</label>
+                        <input type="text" id="w-photo" class="w-full mt-1 border rounded-lg p-2" placeholder="https://placehold.co/150">
+                    </div>
+                    <button onclick="handleWorkerSignup()" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700">Register as Worker</button>
+                </div>
+            </div>
+
+            <!-- Worker Dashboard -->
+            <div id="worker-dashboard" class="hidden">
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <img id="dash-photo" src="" alt="Profile" class="w-16 h-16 rounded-full object-cover border">
+                        <div>
+                            <h3 id="dash-name" class="text-xl font-bold text-slate-800"></h3>
+                            <p class="text-sm text-slate-500"><span id="dash-category"></span> | Pincode: <span id="dash-pincode"></span></p>
+                        </div>
+                    </div>
+                    <button onclick="logoutWorker()" class="bg-rose-100 text-rose-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-200">Logout</button>
+                </div>
+
+                <!-- Edit Profile -->
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h3 class="text-lg font-semibold mb-4">Edit Profile</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Name</label>
+                            <input type="text" id="edit-w-name" class="w-full mt-1 border rounded-lg p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Category</label>
+                            <select id="edit-w-category" class="w-full mt-1 border rounded-lg p-2">
+                                <option value="Plumber">Plumber</option>
+                                <option value="Electrician">Electrician</option>
+                                <option value="Carpenter">Carpenter</option>
+                                <option value="Painter">Painter</option>
+                                <option value="Cleaner">Cleaner</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Pincode</label>
+                            <input type="text" id="edit-w-pincode" class="w-full mt-1 border rounded-lg p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Photo URL</label>
+                            <input type="text" id="edit-w-photo" class="w-full mt-1 border rounded-lg p-2">
+                        </div>
+                    </div>
+                    <button onclick="saveProfileChanges()" class="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700">Save Changes</button>
+                </div>
+
+                <!-- Incoming Requests -->
+                <h3 class="text-xl font-bold mb-4">Incoming Client Work Requests</h3>
+                <div id="worker-requests-list" class="space-y-4"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Request Modal -->
+    <div id="request-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl max-w-md w-full shadow-lg">
+            <h3 class="text-lg font-bold mb-4">Send Work Request to <span id="modal-worker-name"></span></h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Describe Your Requirements</label>
+                    <textarea id="modal-requirements" rows="3" class="w-full mt-1 border rounded-lg p-2" placeholder="Explain what work needs to be done..."></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeRequestModal()" class="px-4 py-2 bg-slate-200 rounded-lg text-sm font-medium">Cancel</button>
+                    <button onclick="submitWorkRequest()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Send Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to separate JavaScript file -->
+    <script src="script.js"></script>
+</body>
+</html>
