@@ -1,10 +1,5 @@
 // Smart Hire Application - Core Logic & Data Storage
 
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxzdSer4eJsQ0P2RMDsXFoCumvkKHrnwSKaWT7p9rtTONsHqNFc-5gtKRHJgBhdtC58/exec";
-
-// Default avatar placeholder
-const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80";
-
 // Initial Mock Data Setup
 const initialWorkers = [
   {
@@ -42,14 +37,17 @@ let workers = JSON.parse(localStorage.getItem('sh_workers')) || initialWorkers;
 let clients = JSON.parse(localStorage.getItem('sh_clients')) || [];
 let currentUser = JSON.parse(localStorage.getItem('sh_currentUser')) || null;
 
+// Initialize state
 saveState();
 
+// Save data to localStorage
 function saveState() {
   localStorage.setItem('sh_workers', JSON.stringify(workers));
   localStorage.setItem('sh_clients', JSON.stringify(clients));
   localStorage.setItem('sh_currentUser', JSON.stringify(currentUser));
 }
 
+// Navigation Handler
 function showSection(sectionId) {
   const sections = ['landingSection', 'clientAuthSection', 'workerAuthSection', 'clientDashboard', 'workerDashboard'];
   sections.forEach(id => {
@@ -60,6 +58,7 @@ function showSection(sectionId) {
   const target = document.getElementById(sectionId);
   if (target) target.classList.remove('hidden');
 
+  // Update Header UI
   const navInfo = document.getElementById('userNavInfo');
   if (currentUser) {
     navInfo.classList.remove('hidden');
@@ -70,6 +69,7 @@ function showSection(sectionId) {
   }
 }
 
+// Auth Box Switcher
 function openAuth(role, type) {
   if (role === 'client') {
     showSection('clientAuthSection');
@@ -90,7 +90,7 @@ function toggleAuthForm(role, type) {
   }
 }
 
-// CLIENT AUTH
+// --- CLIENT AUTHENTICATION ---
 function handleClientSignup(e) {
   e.preventDefault();
   const newClient = {
@@ -103,15 +103,6 @@ function handleClientSignup(e) {
     pincode: document.getElementById('cRegPincode').value,
     pass: document.getElementById('cRegPass').value
   };
-
-  if (GOOGLE_SHEET_URL) {
-    fetch(GOOGLE_SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newClient)
-    }).catch(err => console.error('Sheet Sync Error:', err));
-  }
 
   clients.push(newClient);
   currentUser = newClient;
@@ -136,7 +127,7 @@ function handleClientLogin(e) {
   }
 }
 
-// WORKER AUTH
+// --- WORKER AUTHENTICATION ---
 function handleWorkerSignup(e) {
   e.preventDefault();
   const newWorker = {
@@ -152,18 +143,9 @@ function handleWorkerSignup(e) {
     pincode: document.getElementById('wRegPincode').value,
     pass: document.getElementById('wRegPass').value,
     available: true,
-    avatar: DEFAULT_AVATAR,
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
     requests: []
   };
-
-  if (GOOGLE_SHEET_URL) {
-    fetch(GOOGLE_SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newWorker)
-    }).catch(err => console.error('Sheet Sync Error:', err));
-  }
 
   workers.push(newWorker);
   currentUser = newWorker;
@@ -194,26 +176,7 @@ function logout() {
   showSection('landingSection');
 }
 
-// --- NEW FEATURE 1: DELETE ACCOUNT ---
-function deleteCurrentAccount() {
-  if (!currentUser) return;
-
-  const confirmDelete = confirm(`Are you sure you want to permanently delete your account (${currentUser.name})? This action cannot be undone.`);
-  if (!confirmDelete) return;
-
-  if (currentUser.role === 'client') {
-    clients = clients.filter(c => c.id !== currentUser.id);
-  } else if (currentUser.role === 'worker') {
-    workers = workers.filter(w => w.id !== currentUser.id);
-  }
-
-  currentUser = null;
-  saveState();
-  alert('Your account has been deleted successfully.');
-  showSection('landingSection');
-}
-
-// CLIENT DASHBOARD
+// --- CLIENT DASHBOARD LOGIC ---
 function renderWorkers() {
   const container = document.getElementById('workersGrid');
   const query = document.getElementById('searchInput').value.toLowerCase();
@@ -234,7 +197,7 @@ function renderWorkers() {
     <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between">
       <div class="p-6">
         <div class="flex items-center space-x-4">
-          <img src="${w.avatar || DEFAULT_AVATAR}" class="w-16 h-16 rounded-full object-cover border-2 border-gray-100" />
+          <img src="${w.avatar}" class="w-16 h-16 rounded-full object-cover border-2 border-gray-100" />
           <div>
             <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">${w.category}</span>
             <h3 class="font-bold text-gray-900 text-lg mt-1">${w.name}</h3>
@@ -265,6 +228,7 @@ function renderWorkers() {
   `).join('');
 }
 
+// Hire Request Modal
 function openHireModal(workerId) {
   document.getElementById('targetWorkerId').value = workerId;
   document.getElementById('hireModal').classList.remove('hidden');
@@ -299,7 +263,7 @@ function submitHireRequest(e) {
   }
 }
 
-// WORKER DASHBOARD
+// --- WORKER DASHBOARD LOGIC ---
 function renderWorkerProfile() {
   const currentWorker = workers.find(w => w.id === currentUser.id) || currentUser;
 
@@ -309,7 +273,7 @@ function renderWorkerProfile() {
   document.getElementById('workerProfileSalary').innerText = currentWorker.salary;
   document.getElementById('workerProfileLoc').innerText = currentWorker.location;
   document.getElementById('workerProfilePin').innerText = currentWorker.pincode;
-  document.getElementById('workerAvatar').src = currentWorker.avatar || DEFAULT_AVATAR;
+  document.getElementById('workerAvatar').src = currentWorker.avatar;
 
   const toggle = document.getElementById('availabilityToggle');
   const badge = document.getElementById('availabilityBadge');
@@ -348,18 +312,7 @@ function handleImageUpload(e) {
   }
 }
 
-// --- NEW FEATURE 2: REMOVE PROFILE PICTURE ---
-function removeProfilePicture() {
-  const workerIndex = workers.findIndex(w => w.id === currentUser.id);
-  if (workerIndex !== -1) {
-    workers[workerIndex].avatar = DEFAULT_AVATAR;
-    currentUser = workers[workerIndex];
-    saveState();
-    renderWorkerProfile();
-    alert('Profile picture removed!');
-  }
-}
-
+// Edit Profile Modal
 function openEditModal() {
   const currentWorker = workers.find(w => w.id === currentUser.id);
   document.getElementById('editName').value = currentWorker.name;
@@ -389,6 +342,7 @@ function saveWorkerProfile(e) {
   }
 }
 
+// Requests Management
 function renderRequests(worker) {
   const list = document.getElementById('requestsList');
   const badge = document.getElementById('requestCountBadge');
@@ -437,6 +391,7 @@ function closeModal(modalId) {
   document.getElementById(modalId).classList.add('hidden');
 }
 
+// Initial Boot Logic
 if (currentUser) {
   showSection(currentUser.role === 'client' ? 'clientDashboard' : 'workerDashboard');
   if (currentUser.role === 'client') renderWorkers();
