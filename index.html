@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Custom Styles -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
@@ -24,7 +25,7 @@
       <div id="userNavInfo" class="hidden flex items-center space-x-4">
         <span id="userBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800"></span>
         <span id="userNameDisplay" class="font-medium text-gray-700 text-sm hidden sm:inline"></span>
-        <button onclick="logout()" class="text-sm font-medium text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition">
+        <button onclick="logout()" class="text-sm font-medium text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
           <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
         </button>
       </div>
@@ -34,14 +35,344 @@
   <!-- MAIN CONTAINER -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- LANDING PAGE SECTION -->
+    <!-- 1. LANDING PAGE SECTION -->
     <section id="landingSection" class="space-y-12">
+      <!-- Hero Banner -->
       <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
         <div class="max-w-2xl z-10 relative">
           <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">AI Powered Platform</span>
           <h1 class="text-4xl sm:text-6xl font-black mt-4 leading-tight">Smart Hire</h1>
           <p class="mt-4 text-blue-100 text-lg">Connecting skilled local workers with clients instantly. Fast, reliable, and transparent daily-wage hiring at your fingertips.</p>
         </div>
+        <!-- Hero AI Graphic Simulation -->
         <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl">
           <div class="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 text-center">
-            <img src="
+            <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=300&q=80" alt="Electrician" class="w-full h-24 object-cover rounded-lg mb-2" />
+            <span class="text-xs font-semibold">Electrician</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 text-center">
+            <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=300&q=80" alt="Plumber" class="w-full h-24 object-cover rounded-lg mb-2" />
+            <span class="text-xs font-semibold">Plumber</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 text-center">
+            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80" alt="Carpenter" class="w-full h-24 object-cover rounded-lg mb-2" />
+            <span class="text-xs font-semibold">Carpenter</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 text-center">
+            <img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=300&q=80" alt="Painter" class="w-full h-24 object-cover rounded-lg mb-2" />
+            <span class="text-xs font-semibold">Painter</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role Selection Cards -->
+      <div class="text-center space-y-4">
+        <h2 class="text-2xl font-bold text-gray-900">Choose How You Want to Continue</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto pt-4">
+          <!-- Client Option -->
+          <div class="bg-white rounded-2xl border border-gray-200 p-8 text-left hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition">
+                <i class="fa-solid fa-user-tie"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-gray-900">I am a Client</h3>
+              <p class="text-gray-600 mt-2">Find and hire verified workers in your area by location, pincode, or skill set.</p>
+            </div>
+            <div class="mt-8 flex gap-3">
+              <button onclick="openAuth('client', 'login')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl shadow transition">Login</button>
+              <button onclick="openAuth('client', 'signup')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-4 rounded-xl transition">Sign Up</button>
+            </div>
+          </div>
+
+          <!-- Worker Option -->
+          <div class="bg-white rounded-2xl border border-gray-200 p-8 text-left hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-emerald-600 group-hover:text-white transition">
+                <i class="fa-solid fa-helmet-safety"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-gray-900">I am a Worker</h3>
+              <p class="text-gray-600 mt-2">Create your profile, set your daily rate, toggle availability, and receive work requests directly.</p>
+            </div>
+            <div class="mt-8 flex gap-3">
+              <button onclick="openAuth('worker', 'login')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl shadow transition">Login</button>
+              <button onclick="openAuth('worker', 'signup')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-4 rounded-xl transition">Sign Up</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CLIENT AUTH SECTION -->
+    <section id="clientAuthSection" class="hidden max-w-md mx-auto bg-white p-8 rounded-2xl border border-gray-200 shadow-md">
+      <div id="clientLoginBox">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Client Login</h2>
+        <form onsubmit="handleClientLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Email</label>
+            <input type="email" id="cLogEmail" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Password</label>
+            <input type="password" id="cLogPass" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">Sign In</button>
+        </form>
+        <p class="mt-4 text-center text-sm text-gray-600">Don't have an account? <button onclick="toggleAuthForm('client', 'signup')" class="text-blue-600 font-bold hover:underline">Sign Up</button></p>
+      </div>
+
+      <div id="clientSignupBox" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Client Registration</h2>
+        <form onsubmit="handleClientSignup(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Full Name</label>
+            <input type="text" id="cRegName" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Email</label>
+            <input type="email" id="cRegEmail" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Contact Number</label>
+            <input type="tel" id="cRegContact" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Location / Address</label>
+            <input type="text" id="cRegLocation" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Pincode</label>
+            <input type="text" id="cRegPincode" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Password</label>
+            <input type="password" id="cRegPass" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">Create Client Account</button>
+        </form>
+        <p class="mt-4 text-center text-sm text-gray-600">Already registered? <button onclick="toggleAuthForm('client', 'login')" class="text-blue-600 font-bold hover:underline">Log In</button></p>
+      </div>
+    </section>
+
+    <!-- 3. WORKER AUTH SECTION -->
+    <section id="workerAuthSection" class="hidden max-w-md mx-auto bg-white p-8 rounded-2xl border border-gray-200 shadow-md">
+      <div id="workerLoginBox">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Worker Login</h2>
+        <form onsubmit="handleWorkerLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Email</label>
+            <input type="email" id="wLogEmail" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Password</label>
+            <input type="password" id="wLogPass" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition">Sign In</button>
+        </form>
+        <p class="mt-4 text-center text-sm text-gray-600">New Worker? <button onclick="toggleAuthForm('worker', 'signup')" class="text-emerald-600 font-bold hover:underline">Register Now</button></p>
+      </div>
+
+      <div id="workerSignupBox" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Worker Registration</h2>
+        <form onsubmit="handleWorkerSignup(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Full Name</label>
+            <input type="text" id="wRegName" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Email</label>
+            <input type="email" id="wRegEmail" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Contact Number</label>
+            <input type="tel" id="wRegContact" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Category / Skill</label>
+            <select id="wRegCategory" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="">Select Specialty</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Carpenter">Carpenter</option>
+              <option value="Painter">Painter</option>
+              <option value="Mason / Construction">Mason / Construction</option>
+              <option value="General Helper">General Helper</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 uppercase">Experience (Yrs)</label>
+              <input type="number" id="wRegExp" required min="0" class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 uppercase">Per Day Salary (₹)</label>
+              <input type="number" id="wRegSalary" required min="100" class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Location / Area</label>
+            <input type="text" id="wRegLocation" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Pincode</label>
+            <input type="text" id="wRegPincode" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Password</label>
+            <input type="password" id="wRegPass" required class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition">Register as Worker</button>
+        </form>
+        <p class="mt-4 text-center text-sm text-gray-600">Already registered? <button onclick="toggleAuthForm('worker', 'login')" class="text-emerald-600 font-bold hover:underline">Log In</button></p>
+      </div>
+    </section>
+
+    <!-- 4. CLIENT DASHBOARD -->
+    <section id="clientDashboard" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">Find Skilled Workers Near You</h2>
+          <p class="text-gray-500 text-sm">Browse verified local professionals and send instant hiring requests</p>
+        </div>
+        <!-- Search and Filter Box -->
+        <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto">
+          <input type="text" id="searchInput" oninput="renderWorkers()" placeholder="Search location or pincode..." class="px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm w-full sm:w-64" />
+          <select id="categoryFilter" onchange="renderWorkers()" class="px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+            <option value="ALL">All Categories</option>
+            <option value="Electrician">Electrician</option>
+            <option value="Plumber">Plumber</option>
+            <option value="Carpenter">Carpenter</option>
+            <option value="Painter">Painter</option>
+            <option value="Mason / Construction">Mason / Construction</option>
+            <option value="General Helper">General Helper</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Workers List Grid -->
+      <div id="workersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamically Populated -->
+      </div>
+    </section>
+
+    <!-- 5. WORKER DASHBOARD -->
+    <section id="workerDashboard" class="hidden space-y-8">
+      <!-- Profile & Availability Bar -->
+      <div class="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div class="flex items-center space-x-6">
+          <div class="relative group">
+            <img id="workerAvatar" src="https://via.placeholder.com/150" alt="Worker Avatar" class="w-24 h-24 rounded-full object-cover border-4 border-emerald-500 shadow-md" />
+            <label class="absolute bottom-0 right-0 bg-emerald-600 text-white p-2 rounded-full cursor-pointer hover:bg-emerald-700 shadow">
+              <i class="fa-solid fa-camera text-xs"></i>
+              <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
+            </label>
+          </div>
+          <div>
+            <div class="flex items-center space-x-3">
+              <h2 id="workerProfileName" class="text-2xl font-bold text-gray-900">Worker Name</h2>
+              <button onclick="openEditModal()" class="text-gray-400 hover:text-emerald-600 text-sm"><i class="fa-solid fa-pen"></i></button>
+            </div>
+            <p id="workerProfileCategory" class="text-emerald-600 font-semibold text-sm">Category</p>
+            <div class="mt-2 text-xs text-gray-500 space-y-1">
+              <p><i class="fa-solid fa-briefcase mr-1"></i> <span id="workerProfileExp">0</span> Years Exp | <span class="font-bold text-gray-800">₹<span id="workerProfileSalary">0</span>/day</span></p>
+              <p><i class="fa-solid fa-location-dot mr-1"></i> <span id="workerProfileLoc">Location</span> (<span id="workerProfilePin">000000</span>)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toggle Switch -->
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center space-x-4">
+          <div>
+            <span class="block text-xs font-bold text-gray-500 uppercase">Availability Status</span>
+            <span id="availabilityBadge" class="text-sm font-bold text-emerald-600">Available For Work</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="availabilityToggle" onchange="toggleAvailability()" class="sr-only peer" checked />
+            <div class="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Incoming Client Requests -->
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+        <h3 class="text-xl font-bold text-gray-900 flex items-center justify-between">
+          <span><i class="fa-solid fa-inbox text-emerald-600 mr-2"></i> Client Hiring Requests</span>
+          <span id="requestCountBadge" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">0 Requests</span>
+        </h3>
+        <div id="requestsList" class="space-y-4">
+          <!-- Dynamically populated requests -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: HIRE WORKER (CLIENT SIDE) -->
+  <div id="hireModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-bold text-gray-900">Send Work Request</h3>
+        <button onclick="closeModal('hireModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <form onsubmit="submitHireRequest(event)" class="space-y-4">
+        <input type="hidden" id="targetWorkerId" />
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase">Work Details / Instructions</label>
+          <textarea id="hireDetails" required rows="3" placeholder="Describe the job requirements..." class="w-full mt-1 p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase">Proposed Date</label>
+          <input type="date" id="hireDate" required class="w-full mt-1 p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">Confirm & Send Request</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT WORKER PROFILE -->
+  <div id="editProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-bold text-gray-900">Edit Profile</h3>
+        <button onclick="closeModal('editProfileModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <form onsubmit="saveWorkerProfile(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase">Full Name</label>
+          <input type="text" id="editName" required class="w-full mt-1 p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase">Category</label>
+          <select id="editCategory" required class="w-full mt-1 p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+            <option value="Electrician">Electrician</option>
+            <option value="Plumber">Plumber</option>
+            <option value="Carpenter">Carpenter</option>
+            <option value="Painter">Painter</option>
+            <option value="Mason / Construction">Mason / Construction</option>
+            <option value="General Helper">General Helper</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Experience (Yrs)</label>
+            <input type="number" id="editExp" required class="w-full mt-1 p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase">Per Day Salary (₹)</label>
+            <input type="number" id="editSalary" required class="w-full mt-1 p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase">Location / Area</label>
+          <input type="text" id="editLocation" required class="w-full mt-1 p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase">Pincode</label>
+          <input type="text" id="editPincode" required class="w-full mt-1 p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
