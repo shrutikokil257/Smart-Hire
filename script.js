@@ -1,5 +1,8 @@
 // Smart Hire Application - Core Logic & Data Storage
 
+// Connected Google Apps Script Web App URL
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxzdSer4eJsQ0P2RMDsXFoCumvkKHrnwSKaWT7p9rtTONsHqNFc-5gtKRHJgBhdtC58/exec";
+
 // Initial Mock Data Setup
 const initialWorkers = [
   {
@@ -104,6 +107,16 @@ function handleClientSignup(e) {
     pass: document.getElementById('cRegPass').value
   };
 
+  // Send Data to Google Sheets
+  if (GOOGLE_SHEET_URL) {
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newClient)
+    }).catch(err => console.error('Google Sheet Sync Error:', err));
+  }
+
   clients.push(newClient);
   currentUser = newClient;
   saveState();
@@ -146,6 +159,16 @@ function handleWorkerSignup(e) {
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
     requests: []
   };
+
+  // Send Data to Google Sheets
+  if (GOOGLE_SHEET_URL) {
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newWorker)
+    }).catch(err => console.error('Google Sheet Sync Error:', err));
+  }
 
   workers.push(newWorker);
   currentUser = newWorker;
