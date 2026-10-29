@@ -1,52 +1,33 @@
-// Smart Hire Application - Google Sheet Only Storage
+// Smart Hire Application - JSON Connected Logic with Account Deletion & Blank Avatars
 
-// SheetDB API Endpoint URL
-const SHEET_DB_URL = "https://sheetdb.io/api/v1/30fwfqxvabnss";
-
-// In-memory states (fetched or session-based)
 let workers = [];
-let clients = [];
-let currentUser = null;
+let clients = JSON.parse(localStorage.getItem('sh_clients')) || [];
+let currentUser = JSON.parse(localStorage.getItem('sh_currentUser')) || null;
 
-// Fetch existing workers and clients from Google Sheet on startup so login/search works
+const DEFAULT_BLANK_AVATAR = "https://via.placeholder.com/150";
+
+// Automatically load workers from workers.json on startup
 window.addEventListener('DOMContentLoaded', () => {
-  loadDataFromSheet();
+  fetch('workers.json')
+    .then(response => response.json())
+    .then(data => {
+      workers = data;
+      if (currentUser) {
+        showSection(currentUser.role === 'client' ? 'clientDashboard' : 'workerDashboard');
+        if (currentUser.role === 'client') renderWorkers();
+        else renderWorkerProfile();
+      } else {
+        showSection('landingSection');
+      }
+    })
+    .catch(err => console.error('Error loading workers.json:', err));
 });
 
-function loadDataFromSheet() {
-  if (!SHEET_DB_URL) return;
-
-  // Fetch workers
-  fetch(SHEET_DB_URL + "?role=worker")
-    .then(res => res.json())
-    .then(data => {
-      if (Array.isArray(data)) {
-        workers = data.map((w, index) => ({
-          ...w,
-          id: w.id || 'w_' + index,
-          available: w.available !== 'false' && w.available !== false,
-          avatar: w.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
-          requests: []
-        }));
-      }
-    })
-    .catch(err => console.error('Error loading workers:', err));
-
-  // Fetch clients
-  fetch(SHEET_DB_URL + "?role=client")
-    .then(res => res.json())
-    .then(data => {
-      if (Array.isArray(data)) {
-        clients = data.map((c, index) => ({
-          ...c,
-          id: c.id || 'c_' + index
-        }));
-      }
-    })
-    .catch(err => console.error('Error loading clients:', err));
+function saveState() {
+  localStorage.setItem('sh_clients', JSON.stringify(clients));
+  localStorage.setItem('sh_currentUser', JSON.stringify(currentUser));
 }
 
-// Navigation Handler
 function showSection(sectionId) {
   const sections = ['landingSection', 'clientAuthSection', 'workerAuthSection', 'clientDashboard', 'workerDashboard'];
   sections.forEach(id => {
@@ -57,7 +38,6 @@ function showSection(sectionId) {
   const target = document.getElementById(sectionId);
   if (target) target.classList.remove('hidden');
 
-  // Update Header UI
   const navInfo = document.getElementById('userNavInfo');
   if (currentUser) {
     navInfo.classList.remove('hidden');
@@ -68,14 +48,18 @@ function showSection(sectionId) {
   }
 }
 
-// Auth Box Switcher
 function openAuth(role, type) {
   if (role === 'client') {
     showSection('clientAuthSection');
     toggleAuthForm('client', type);
   } else {
     showSection('workerAuthSection');
-    toggleAuthForm('worker', type);
+    if (type === 'signup') {
+      alert('Worker registrations are restricted to pre-approved database entries only. Please log in with an approved worker email.');
+      toggleAuthForm('worker', 'login');
+    } else {
+      toggleAuthForm('worker', 'login');
+    }
   }
 }
 
@@ -84,12 +68,12 @@ function toggleAuthForm(role, type) {
     document.getElementById('clientLoginBox').classList.toggle('hidden', type !== 'login');
     document.getElementById('clientSignupBox').classList.toggle('hidden', type !== 'signup');
   } else {
-    document.getElementById('workerLoginBox').classList.toggle('hidden', type !== 'login');
-    document.getElementById('workerSignupBox').classList.toggle('hidden', type !== 'signup');
+    document.getElementById('workerLoginBox').classList.remove('hidden');
+    document.getElementById('workerSignupBox').classList.add('hidden');
   }
 }
 
-// --- CLIENT AUTHENTICATION (Google Sheet Direct) ---
+// --- CLIENT AUTHENTICATION ---
 function handleClientSignup(e) {
   e.preventDefault();
   const newClient = {
@@ -103,27 +87,11 @@ function handleClientSignup(e) {
     pass: document.getElementById('cRegPass').value
   };
 
-  // Send Data directly to Google Sheet via SheetDB
-  if (SHEET_DB_URL) {
-    fetch(SHEET_DB_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ data: [newClient] })
-    })
-    .then(() => {
-      clients.push(newClient);
-      currentUser = newClient;
-      showSection('clientDashboard');
-      renderWorkers();
-    })
-    .catch(err => {
-      console.error('SheetDB Sync Error:', err);
-      alert('Error saving to Google Sheet.');
-    });
-  }
+  clients.push(newClient);
+  currentUser = newClient;
+  saveState();
+  showSection('clientDashboard');
+  renderWorkers();
 }
 
 function handleClientLogin(e) {
@@ -133,7 +101,8 @@ function handleClientLogin(e) {
 
   const found = clients.find(c => c.email === email && c.pass === pass);
   if (found) {
-    currentUser = found;
+    currentUser = { ...found, role: 'client' };
+    saveState();
     showSection('clientDashboard');
     renderWorkers();
   } else {
@@ -141,69 +110,47 @@ function handleClientLogin(e) {
   }
 }
 
-// --- WORKER AUTHENTICATION (Google Sheet Direct) ---
-function handleWorkerSignup(e) {
-  e.preventDefault();
-  const newWorker = {
-    id: 'w_' + Date.now(),
-    role: 'worker',
-    name: document.getElementById('wRegName').value,
-    email: document.getElementById('wRegEmail').value,
-    contact: document.getElementById('wRegContact').value,
-    category: document.getElementById('wRegCategory').value,
-    experience: document.getElementById('wRegExp').value,
-    salary: document.getElementById('wRegSalary').value,
-    location: document.getElementById('wRegLocation').value,
-    pincode: document.getElementById('wRegPincode').value,
-    pass: document.getElementById('wRegPass').value,
-    available: true,
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80'
-  };
-
-  // Send Data directly to Google Sheet via SheetDB
-  if (SHEET_DB_URL) {
-    fetch(SHEET_DB_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ data: [newWorker] })
-    })
-    .then(() => {
-      workers.push({ ...newWorker, requests: [] });
-      currentUser = newWorker;
-      showSection('workerDashboard');
-      renderWorkerProfile();
-    })
-    .catch(err => {
-      console.error('SheetDB Sync Error:', err);
-      alert('Error saving to Google Sheet.');
-    });
-  }
-}
-
+// --- WORKER LOGIN ---
 function handleWorkerLogin(e) {
   e.preventDefault();
   const email = document.getElementById('wLogEmail').value;
   const pass = document.getElementById('wLogPass').value;
 
-  const found = workers.find(w => w.email === email && w.pass === pass);
+  const found = workers.find(w => w.email === email);
   if (found) {
-    currentUser = found;
+    currentUser = { ...found, role: 'worker' };
+    saveState();
     showSection('workerDashboard');
     renderWorkerProfile();
   } else {
-    alert('Invalid Email or Password for Worker account');
+    alert('Access Denied: This email is not authorized in the worker database JSON file.');
   }
 }
 
 function logout() {
   currentUser = null;
+  saveState();
   showSection('landingSection');
 }
 
-// --- CLIENT DASHBOARD LOGIC ---
+// --- ACCOUNT DELETION (Both Client & Worker) ---
+function deleteCurrentAccount() {
+  if (!currentUser) return;
+  if (!confirm("Are you sure you want to permanently delete your account?")) return;
+
+  if (currentUser.role === 'client') {
+    clients = clients.filter(c => c.id !== currentUser.id);
+  } else {
+    workers = workers.filter(w => w.id !== currentUser.id);
+  }
+
+  currentUser = null;
+  saveState();
+  alert("Account deleted successfully.");
+  showSection('landingSection');
+}
+
+// --- CLIENT DASHBOARD & FILTERING ---
 function renderWorkers() {
   const container = document.getElementById('workersGrid');
   const query = document.getElementById('searchInput').value.toLowerCase();
@@ -224,7 +171,7 @@ function renderWorkers() {
     <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between">
       <div class="p-6">
         <div class="flex items-center space-x-4">
-          <img src="${w.avatar}" class="w-16 h-16 rounded-full object-cover border-2 border-gray-100" />
+          <img src="${w.avatar || DEFAULT_BLANK_AVATAR}" class="w-16 h-16 rounded-full object-cover border-2 border-gray-100 bg-gray-100" />
           <div>
             <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">${w.category}</span>
             <h3 class="font-bold text-gray-900 text-lg mt-1">${w.name}</h3>
@@ -255,7 +202,6 @@ function renderWorkers() {
   `).join('');
 }
 
-// Hire Request Modal
 function openHireModal(workerId) {
   document.getElementById('targetWorkerId').value = workerId;
   document.getElementById('hireModal').classList.remove('hidden');
@@ -299,14 +245,14 @@ function renderWorkerProfile() {
   document.getElementById('workerProfileSalary').innerText = currentWorker.salary;
   document.getElementById('workerProfileLoc').innerText = currentWorker.location;
   document.getElementById('workerProfilePin').innerText = currentWorker.pincode;
-  document.getElementById('workerAvatar').src = currentWorker.avatar;
+  document.getElementById('workerAvatar').src = currentWorker.avatar || DEFAULT_BLANK_AVATAR;
 
   const toggle = document.getElementById('availabilityToggle');
   const badge = document.getElementById('availabilityBadge');
 
-  toggle.checked = currentWorker.available;
-  badge.innerText = currentWorker.available ? 'Available For Work' : 'Currently Unavailable';
-  badge.className = `text-sm font-bold ${currentWorker.available ? 'text-emerald-600' : 'text-red-500'}`;
+  toggle.checked = currentWorker.available !== false;
+  badge.innerText = toggle.checked ? 'Available For Work' : 'Currently Unavailable';
+  badge.className = `text-sm font-bold ${toggle.checked ? 'text-emerald-600' : 'text-red-500'}`;
 
   renderRequests(currentWorker);
 }
@@ -336,36 +282,16 @@ function handleImageUpload(e) {
   }
 }
 
-// Edit Profile Modal
-function openEditModal() {
-  const currentWorker = workers.find(w => w.id === currentUser.id);
-  document.getElementById('editName').value = currentWorker.name;
-  document.getElementById('editCategory').value = currentWorker.category;
-  document.getElementById('editExp').value = currentWorker.experience;
-  document.getElementById('editSalary').value = currentWorker.salary;
-  document.getElementById('editLocation').value = currentWorker.location;
-  document.getElementById('editPincode').value = currentWorker.pincode;
-  document.getElementById('editProfileModal').classList.remove('hidden');
-}
-
-function saveWorkerProfile(e) {
-  e.preventDefault();
+function removeProfilePicture() {
   const workerIndex = workers.findIndex(w => w.id === currentUser.id);
   if (workerIndex !== -1) {
-    workers[workerIndex].name = document.getElementById('editName').value;
-    workers[workerIndex].category = document.getElementById('editCategory').value;
-    workers[workerIndex].experience = document.getElementById('editExp').value;
-    workers[workerIndex].salary = document.getElementById('editSalary').value;
-    workers[workerIndex].location = document.getElementById('editLocation').value;
-    workers[workerIndex].pincode = document.getElementById('editPincode').value;
-
+    workers[workerIndex].avatar = DEFAULT_BLANK_AVATAR;
     currentUser = workers[workerIndex];
-    closeModal('editProfileModal');
     renderWorkerProfile();
+    alert('Profile picture removed!');
   }
 }
 
-// Requests Management
 function renderRequests(worker) {
   const list = document.getElementById('requestsList');
   const badge = document.getElementById('requestCountBadge');
@@ -389,7 +315,6 @@ function renderRequests(worker) {
         <p class="text-sm font-medium text-gray-800 mt-2 bg-white p-2 rounded border border-gray-200">"${r.details}"</p>
         <p class="text-xs text-gray-400 mt-1">Requested Date: <span class="font-semibold text-gray-700">${r.date}</span></p>
       </div>
-
       ${r.status === 'Pending' ? `
         <div class="flex space-x-2">
           <button onclick="updateRequestStatus(${index}, 'Accepted')" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-lg hover:bg-emerald-700 transition">Accept</button>
@@ -411,13 +336,4 @@ function updateRequestStatus(reqIndex, status) {
 
 function closeModal(modalId) {
   document.getElementById(modalId).classList.add('hidden');
-}
-
-// Initial Boot Logic
-if (currentUser) {
-  showSection(currentUser.role === 'client' ? 'clientDashboard' : 'workerDashboard');
-  if (currentUser.role === 'client') renderWorkers();
-  else renderWorkerProfile();
-} else {
-  showSection('landingSection');
 }
