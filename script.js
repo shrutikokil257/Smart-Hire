@@ -1,123 +1,78 @@
-/**
- * Smart-Hire Local Storage Script
- * Stores, retrieves, and manages candidate data locally in the browser.
- */
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
 
-// ==========================================
-// CONFIGURATION & STORAGE KEY
-// ==========================================
-const STORAGE_KEY = 'smart_hire_candidates';
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-// ==========================================
-// CORE LOCAL STORAGE FUNCTIONS
-// ==========================================
+// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
 
-/**
- * Retrieves candidate data from localStorage.
- * @returns {Array} Array of candidate records.
- */
-function getLocalData() {
+// 1. Worker Signup Endpoint
+app.post('/api/worker/signup', async (req, res) => {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    console.error("Error reading from localStorage:", error);
-    return [];
-  }
-}
-
-/**
- * Saves a new candidate record to localStorage.
- * @param {Array} rowValues - [Name, Email, Position, Experience, Skills, Status, Date]
- * @returns {boolean} True if successful, false otherwise.
- */
-function saveLocalData(rowValues) {
-  try {
-    if (!Array.isArray(rowValues) || rowValues.length === 0) {
-      console.error("Invalid row data provided.");
-      return false;
-    }
-
-    const currentData = getLocalData();
-    currentData.push(rowValues);
+    const { name, email, contact, location, pincode, experience, salary } = req.body;
     
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData));
-    console.log("Data saved to localStorage successfully.");
-    return true;
-  } catch (error) {
-    console.error("Error saving to localStorage:", error);
-    return false;
-  }
-}
+    // JSON Payload formatted for Google Sheets
+    const payload = {
+      sheetName: "Workers",
+      row: [
+        "W-" + Date.now(), // Unique ID
+        name,
+        email,
+        contact,
+        location,
+        pincode,
+        experience,
+        salary,
+        "Available",
+        "Signup",
+        new Date().toLocaleString()
+      ]
+    };
 
-/**
- * Clears all candidate data from localStorage.
- */
-function clearLocalData() {
+    // Sending JSON data to Google Sheets Web App
+    await axios.post(GOOGLE_SCRIPT_URL, payload);
+
+    res.status(200).json({ success: true, message: "Worker registered and saved to Google Sheet!" });
+  } catch (error) {
+    console.error("Error saving worker:", error);
+    res.status(500).json({ success: false, message: "Failed to save data" });
+  }
+});
+
+// 2. Client Signup Endpoint
+app.post('/api/client/signup', async (req, res) => {
   try {
-    localStorage.removeItem(STORAGE_KEY);
-    console.log("Local storage cleared.");
+    const { name, email, contact, location, pincode } = req.body;
+    
+    // JSON Payload formatted for Google Sheets
+    const payload = {
+      sheetName: "Clients",
+      row: [
+        "C-" + Date.now(), // Unique ID
+        name,
+        email,
+        contact,
+        location,
+        pincode,
+        "Signup",
+        new Date().toLocaleString()
+      ]
+    };
+
+    // Sending JSON data to Google Sheets Web App
+    await axios.post(GOOGLE_SCRIPT_URL, payload);
+
+    res.status(200).json({ success: true, message: "Client registered and saved to Google Sheet!" });
   } catch (error) {
-    console.error("Error clearing localStorage:", error);
+    console.error("Error saving client:", error);
+    res.status(500).json({ success: false, message: "Failed to save data" });
   }
-}
+});
 
-// ==========================================
-// DOM INITIALIZATION & EVENT BINDINGS
-// ==========================================
-
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Smart-Hire LocalStorage script initialized.");
-
-  // 1. Initial Data Load on Page Load
-  const storedCandidates = getLocalData();
-  console.log("Loaded existing candidates from storage:", storedCandidates);
-  // TODO: Render your table or UI with `storedCandidates` here if needed
-
-  // 2. Form Submission Handler
-  const candidateForm = document.querySelector("#candidateForm");
-
-  if (candidateForm) {
-    candidateForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      // Safely extract values with fallback checks
-      const nameInput = document.querySelector("#nameInput");
-      const emailInput = document.querySelector("#emailInput");
-      const positionInput = document.querySelector("#positionInput");
-      const experienceInput = document.querySelector("#experienceInput");
-      const skillsInput = document.querySelector("#skillsInput");
-
-      // Validate required fields
-      if (!nameInput || !nameInput.value.trim() || !emailInput || !emailInput.value.trim()) {
-        alert("Please fill in all required fields (Name and Email).");
-        return;
-      }
-
-      // Construct row data matching your columns
-      const rowData = [
-        nameInput.value.trim(),
-        emailInput.value.trim(),
-        positionInput ? positionInput.value.trim() : "",
-        experienceInput ? experienceInput.value.trim() : "",
-        skillsInput ? skillsInput.value.trim() : "",
-        "New", // Default Status
-        new Date().toLocaleString() // Timestamp
-      ];
-
-      // Save locally
-      const success = saveLocalData(rowData);
-
-      if (success) {
-        alert("Candidate saved locally!");
-        candidateForm.reset();
-        
-        // Refresh or view updated list
-        const updatedList = getLocalData();
-        console.log("Updated candidate list:", updatedList);
-      } else {
-        alert("An error occurred while saving locally.");
-      }
-    });
-  }
+// Start server
+app.listen(3000, () => {
+  console.log('Smart Hire backend server running on port 3000');
 });
