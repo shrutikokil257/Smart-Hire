@@ -1,50 +1,49 @@
-// Smart Hire Application - Core Logic & Data Storage
+// Smart Hire Application - Google Sheet Only Storage
 
-// Initial Mock Data Setup
-const initialWorkers = [
-  {
-    id: "w1",
-    name: "Ramesh Kumar",
-    email: "ramesh@gmail.com",
-    contact: "9876543210",
-    category: "Electrician",
-    experience: 5,
-    salary: 600,
-    location: "Downtown",
-    pincode: "400001",
-    available: true,
-    avatar: "https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&w=300&q=80",
-    requests: []
-  },
-  {
-    id: "w2",
-    name: "Suresh Patel",
-    email: "suresh@gmail.com",
-    contact: "9876543211",
-    category: "Plumber",
-    experience: 8,
-    salary: 750,
-    location: "West Suburbs",
-    pincode: "400050",
-    available: true,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-    requests: []
-  }
-];
+// SheetDB API Endpoint URL
+const SHEET_DB_URL = "https://sheetdb.io/api/v1/30fwfqxvabnss";
 
-// App State Management
-let workers = JSON.parse(localStorage.getItem('sh_workers')) || initialWorkers;
-let clients = JSON.parse(localStorage.getItem('sh_clients')) || [];
-let currentUser = JSON.parse(localStorage.getItem('sh_currentUser')) || null;
+// In-memory states (fetched or session-based)
+let workers = [];
+let clients = [];
+let currentUser = null;
 
-// Initialize state
-saveState();
+// Fetch existing workers and clients from Google Sheet on startup so login/search works
+window.addEventListener('DOMContentLoaded', () => {
+  loadDataFromSheet();
+});
 
-// Save data to localStorage
-function saveState() {
-  localStorage.setItem('sh_workers', JSON.stringify(workers));
-  localStorage.setItem('sh_clients', JSON.stringify(clients));
-  localStorage.setItem('sh_currentUser', JSON.stringify(currentUser));
+function loadDataFromSheet() {
+  if (!SHEET_DB_URL) return;
+
+  // Fetch workers
+  fetch(SHEET_DB_URL + "?role=worker")
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data)) {
+        workers = data.map((w, index) => ({
+          ...w,
+          id: w.id || 'w_' + index,
+          available: w.available !== 'false' && w.available !== false,
+          avatar: w.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+          requests: []
+        }));
+      }
+    })
+    .catch(err => console.error('Error loading workers:', err));
+
+  // Fetch clients
+  fetch(SHEET_DB_URL + "?role=client")
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data)) {
+        clients = data.map((c, index) => ({
+          ...c,
+          id: c.id || 'c_' + index
+        }));
+      }
+    })
+    .catch(err => console.error('Error loading clients:', err));
 }
 
 // Navigation Handler
@@ -90,7 +89,7 @@ function toggleAuthForm(role, type) {
   }
 }
 
-// --- CLIENT AUTHENTICATION ---
+// --- CLIENT AUTHENTICATION (Google Sheet Direct) ---
 function handleClientSignup(e) {
   e.preventDefault();
   const newClient = {
@@ -104,11 +103,27 @@ function handleClientSignup(e) {
     pass: document.getElementById('cRegPass').value
   };
 
-  clients.push(newClient);
-  currentUser = newClient;
-  saveState();
-  showSection('clientDashboard');
-  renderWorkers();
+  // Send Data directly to Google Sheet via SheetDB
+  if (SHEET_DB_URL) {
+    fetch(SHEET_DB_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ data: [newClient] })
+    })
+    .then(() => {
+      clients.push(newClient);
+      currentUser = newClient;
+      showSection('clientDashboard');
+      renderWorkers();
+    })
+    .catch(err => {
+      console.error('SheetDB Sync Error:', err);
+      alert('Error saving to Google Sheet.');
+    });
+  }
 }
 
 function handleClientLogin(e) {
@@ -118,8 +133,7 @@ function handleClientLogin(e) {
 
   const found = clients.find(c => c.email === email && c.pass === pass);
   if (found) {
-    currentUser = { ...found, role: 'client' };
-    saveState();
+    currentUser = found;
     showSection('clientDashboard');
     renderWorkers();
   } else {
@@ -127,7 +141,7 @@ function handleClientLogin(e) {
   }
 }
 
-// --- WORKER AUTHENTICATION ---
+// --- WORKER AUTHENTICATION (Google Sheet Direct) ---
 function handleWorkerSignup(e) {
   e.preventDefault();
   const newWorker = {
@@ -143,15 +157,30 @@ function handleWorkerSignup(e) {
     pincode: document.getElementById('wRegPincode').value,
     pass: document.getElementById('wRegPass').value,
     available: true,
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
-    requests: []
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80'
   };
 
-  workers.push(newWorker);
-  currentUser = newWorker;
-  saveState();
-  showSection('workerDashboard');
-  renderWorkerProfile();
+  // Send Data directly to Google Sheet via SheetDB
+  if (SHEET_DB_URL) {
+    fetch(SHEET_DB_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ data: [newWorker] })
+    })
+    .then(() => {
+      workers.push({ ...newWorker, requests: [] });
+      currentUser = newWorker;
+      showSection('workerDashboard');
+      renderWorkerProfile();
+    })
+    .catch(err => {
+      console.error('SheetDB Sync Error:', err);
+      alert('Error saving to Google Sheet.');
+    });
+  }
 }
 
 function handleWorkerLogin(e) {
@@ -161,8 +190,7 @@ function handleWorkerLogin(e) {
 
   const found = workers.find(w => w.email === email && w.pass === pass);
   if (found) {
-    currentUser = { ...found, role: 'worker' };
-    saveState();
+    currentUser = found;
     showSection('workerDashboard');
     renderWorkerProfile();
   } else {
@@ -172,7 +200,6 @@ function handleWorkerLogin(e) {
 
 function logout() {
   currentUser = null;
-  saveState();
   showSection('landingSection');
 }
 
@@ -254,7 +281,6 @@ function submitHireRequest(e) {
 
     if (!workers[workerIndex].requests) workers[workerIndex].requests = [];
     workers[workerIndex].requests.push(newReq);
-    saveState();
 
     alert('Work request sent successfully!');
     closeModal('hireModal');
@@ -290,7 +316,6 @@ function toggleAvailability() {
   if (workerIndex !== -1) {
     workers[workerIndex].available = !workers[workerIndex].available;
     currentUser = workers[workerIndex];
-    saveState();
     renderWorkerProfile();
   }
 }
@@ -304,7 +329,6 @@ function handleImageUpload(e) {
       if (workerIndex !== -1) {
         workers[workerIndex].avatar = evt.target.result;
         currentUser = workers[workerIndex];
-        saveState();
         renderWorkerProfile();
       }
     };
@@ -336,7 +360,6 @@ function saveWorkerProfile(e) {
     workers[workerIndex].pincode = document.getElementById('editPincode').value;
 
     currentUser = workers[workerIndex];
-    saveState();
     closeModal('editProfileModal');
     renderWorkerProfile();
   }
@@ -382,7 +405,6 @@ function updateRequestStatus(reqIndex, status) {
   if (workerIndex !== -1) {
     workers[workerIndex].requests[reqIndex].status = status;
     currentUser = workers[workerIndex];
-    saveState();
     renderWorkerProfile();
   }
 }
