@@ -1,8 +1,7 @@
 /* Custom Styles for Smart Hire Application */
 
-/* Smooth Transition Effects */
 section {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.25s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -16,7 +15,6 @@ section {
   }
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
