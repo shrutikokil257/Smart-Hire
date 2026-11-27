@@ -3,7 +3,7 @@
 const RESET_FLAG_KEY = 'sh_reset_done_v1';
 const DEFAULT_BLANK_AVATAR = 'https://via.placeholder.com/150';
 const GOOGLE_SHEET_API_URL =
-  'https://script.google.com/macros/s/AKfycbz-Ze0Qc-b5TDjPyJP-PTVEpuDdIU6MNNfPCOHISa2y--t_sdIqz0KyIEP6fb7r8io4ew/exec';
+  'https://script.google.com/macros/s/AKfycbzMx4W4kUV1zkn6Be-cKF39hf-iku1ncTZWlE5OrwNo32fuVPk6EbHGqejr6LaIjgs9/exec'
 
 let workers = [];
 let clients = [];
